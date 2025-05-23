@@ -3,11 +3,13 @@ package assets
 import (
 	"bytes"
 	"embed"
+	"fmt"
 	"image"
 	_ "image/png"
 	"io/fs"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
@@ -19,6 +21,32 @@ var TitleFont = mustLoadFontFace("fonts/title.ttf")
 var MeteorSprites = mustLoadImages("images/meteors/*.png")
 var MeteorSpritesSmall = mustLoadImages("images/meteors-small/*.png")
 var LaserSprite = mustLoadImage("images/laser.png")
+var ExplosionSprite = mustLoadImage("images/explosion.png")
+var ExplosionSmallSprite = mustLoadImage("images/explosion-small.png")
+var Explosion = createExplosion()
+var ThrustSound = mustLoadOggVorbis("audio/thrust.ogg")
+
+func mustLoadOggVorbis(name string) *vorbis.Stream {
+	f, err := assets.ReadFile("audio/thrust.ogg")
+	if err != nil {
+		panic(err)
+	}
+
+	stream, err := vorbis.DecodeWithoutResampling(bytes.NewReader(f))
+	if err != nil {
+		panic(err)
+	}
+	return stream
+}
+
+func createExplosion() []*ebiten.Image {
+	var frames []*ebiten.Image
+	for i := 0; i <= 11; i++ {
+		frame := mustLoadImage(fmt.Sprintf("images/explosion/%d.png", i+1))
+		frames = append(frames, frame)
+	}
+	return frames
+}
 
 func mustLoadImages(path string) []*ebiten.Image {
 	matches, err := fs.Glob(assets, path)

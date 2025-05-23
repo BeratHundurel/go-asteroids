@@ -78,6 +78,55 @@ func NewMeteor(baseVelocity float64, g *GameScene, index int) *Meteor {
 	return m
 }
 
+func NewSmallMeteor(baseVelocity float64, g *GameScene, index int) *Meteor {
+	target := Vector{
+		X: ScreenWidth / 2,
+		Y: ScreenHeight / 2,
+	}
+
+	angle := rand.Float64() * 2 * math.Pi
+
+	r := ScreenWidth/2.0 + 500
+
+	pos := Vector{
+		X: target.X + math.Cos(angle)*r,
+		Y: target.Y + math.Sin(angle)*r,
+	}
+
+	velocity := baseVelocity + rand.Float64()*1.5
+
+	direction := Vector{
+		X: target.X - pos.X,
+		Y: target.Y - pos.Y,
+	}
+	normalizedDirection := direction.Normalize()
+
+	movement := Vector{
+		X: normalizedDirection.X * velocity,
+		Y: normalizedDirection.Y * velocity,
+	}
+
+	sprite := assets.MeteorSpritesSmall[rand.Intn(len(assets.MeteorSpritesSmall))]
+
+	meteorObj := resolv.NewCircle(pos.X, pos.Y, float64(sprite.Bounds().Dx()/2))
+
+	m := &Meteor{
+		game:          g,
+		position:      pos,
+		movement:      movement,
+		rotationSpeed: rotationSpeedMin + rand.Float64()*(rotationSpeedMax-rotationSpeedMin),
+		sprite:        sprite,
+		angle:         angle,
+		meteorObj:     meteorObj,
+	}
+
+	m.meteorObj.SetPosition(pos.X, pos.Y)
+	m.meteorObj.Tags().Set(TagMeteor | TagSmall)
+	m.meteorObj.SetData(&ObjectData{index: index})
+
+	return m
+}
+
 func (m *Meteor) Update() {
 	dx := m.movement.X
 	dy := m.movement.Y
