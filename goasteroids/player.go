@@ -28,15 +28,15 @@ func NewPlayer(game *GameScene) *Player {
 	sprite := assets.PlayerSprite
 
 	halfW, halfH := HalfOfTheImage(sprite)
-	
+
 	pos := Vector{
-		X: ScreenWidth / 2 - halfW,
-		Y: ScreenHeight / 2 - halfH,
+		X: ScreenWidth/2 - halfW,
+		Y: ScreenHeight/2 - halfH,
 	}
-	
+
 	p := &Player{
-		sprite: sprite,
-		game:   game,
+		sprite:   sprite,
+		game:     game,
 		position: pos,
 	}
 
@@ -45,13 +45,11 @@ func NewPlayer(game *GameScene) *Player {
 
 func (p *Player) Draw(screen *ebiten.Image) {
 	halfW, halfH := HalfOfTheImage(p.sprite)
-	
-	op := &ebiten.DrawImageOptions{}
 
+	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-halfH, -halfW)
 	op.GeoM.Rotate(p.rotation)
 	op.GeoM.Translate(halfW, halfH)
-
 	op.GeoM.Translate(p.position.X, p.position.Y)
 
 	screen.DrawImage(p.sprite, op)
@@ -74,7 +72,7 @@ func (p *Player) Update() {
 func (p *Player) accelerate() {
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
 		p.keepOnScreen()
-		
+
 		if curAcceleration < maxAcceleration {
 			curAcceleration = p.velocity + 4
 		}
@@ -93,7 +91,6 @@ func (p *Player) accelerate() {
 	}
 }
 
-
 func (p *Player) keepOnScreen() {
 	if p.position.X >= float64(ScreenWidth) {
 		p.position.X = 0
@@ -106,12 +103,5 @@ func (p *Player) keepOnScreen() {
 	}
 	if p.position.Y < 0 {
 		p.position.Y = ScreenHeight
-	}	
-}
-
-func HalfOfTheImage(image *ebiten.Image) (float64, float64) {
-	bounds := image.Bounds()
-	halfW := float64(bounds.Dx()) / 2
-	halfH := float64(bounds.Dy()) / 2
-	return halfW, halfH
+	}
 }

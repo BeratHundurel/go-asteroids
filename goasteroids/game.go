@@ -17,7 +17,9 @@ func (i *Input) Update() {
 func (g *Game) Update() error {
 	if (g.sceneManager) == nil {
 		g.sceneManager = &SceneManager{}
-		g.sceneManager.GoToScene(&TitleScene{})
+		g.sceneManager.GoToScene(&TitleScene{
+			meteors: make(map[int]*Meteor),
+		})
 	}
 
 	g.input.Update()
