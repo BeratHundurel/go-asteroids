@@ -23,7 +23,7 @@ type Meteor struct {
 	angle         float64
 	rotationSpeed float64
 	sprite        *ebiten.Image
-	meteorObj     *resolv.Circle
+	meteorObj     *resolv.Circle 
 }
 
 func NewMeteor(baseVelocity float64, g *GameScene, index int) *Meteor {
@@ -149,7 +149,6 @@ func (m *Meteor) Draw(screen *ebiten.Image) {
 	op.GeoM.Translate(m.position.X, m.position.Y)
 
 	screen.DrawImage(m.sprite, op)
-
 }
 
 func (m *Meteor) keepOnScreen() {
