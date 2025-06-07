@@ -1,12 +1,16 @@
 package goasteroids
 
 import (
+	"fmt"
 	"go-asteroids/assets"
+	"image/color"
+	"log"
 	"math/rand"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/solarlune/resolv"
 )
 
@@ -17,6 +21,7 @@ const (
 	meteorSpeedUpTime    = 1000 * time.Millisecond
 	cleanUpExplosionTime = 200 * time.Millisecond
 	baseBeatWaitTime     = 1600
+	numberOfStars        = 1000
 )
 
 type GameScene struct {
@@ -48,6 +53,8 @@ type GameScene struct {
 	beatTimer            *Timer
 	beatWaitTime         int
 	playBeatOne          bool
+	stars                []*Star
+	currentLevel         int
 }
 
 func NewGameScene() *GameScene {
@@ -66,9 +73,12 @@ func NewGameScene() *GameScene {
 		cleanUpTimer:         NewTimer(cleanUpExplosionTime),
 		beatTimer:            NewTimer(2 * time.Second),
 		beatWaitTime:         baseBeatWaitTime,
+		currentLevel:         1,
 	}
 	g.player = NewPlayer(g)
 	g.space.Add(g.player.playerObj)
+	g.stars = GenerateStars(numberOfStars)
+
 	g.explosionFrames = assets.Explosion
 	g.audioContext = audio.NewContext(48000)
 	g.thrustPlayer, _ = g.audioContext.NewPlayer(assets.ThrustSound)
@@ -107,13 +117,17 @@ func (g *GameScene) Update(state *State) error {
 	g.isMeteorHitByPlayerLaser()
 
 	g.cleanUp()
-	
+
 	g.beatSound()
 
 	return nil
 }
 
 func (g *GameScene) Draw(screen *ebiten.Image) {
+	for _, s := range g.stars {
+		s.Draw(screen)
+	}
+
 	g.player.Draw(screen)
 
 	if g.exhaust != nil {
@@ -127,6 +141,55 @@ func (g *GameScene) Draw(screen *ebiten.Image) {
 	for _, l := range g.lasers {
 		l.Draw(screen)
 	}
+
+	if len(g.player.lifeIndicators) > 0 {
+		for _, li := range g.player.lifeIndicators {
+			li.Draw(screen)
+		}
+	}
+
+	textToDraw := fmt.Sprintf("%06d", g.score)
+	op := &text.DrawOptions{
+		LayoutOptions: text.LayoutOptions{
+			PrimaryAlign: text.AlignCenter,
+		},
+	}
+	op.ColorScale.ScaleWithColor(color.White)
+	op.GeoM.Translate(ScreenWidth/2, 40)
+	text.Draw(screen, textToDraw, &text.GoTextFace{
+		Source: assets.ScoreFont,
+		Size:   24,
+	}, op)
+	
+	if g.score > highScore {
+		highScore = g.score
+	}
+
+	textToDraw = fmt.Sprintf("HIGH SCORE %06d", highScore)
+	op = &text.DrawOptions{
+		LayoutOptions: text.LayoutOptions{
+			PrimaryAlign: text.AlignCenter,
+		},
+	}
+	op.ColorScale.ScaleWithColor(color.White)
+	op.GeoM.Translate(ScreenWidth/2, 75)
+	text.Draw(screen, textToDraw, &text.GoTextFace{
+		Source: assets.ScoreFont,
+		Size:   16,
+	}, op)
+
+	textToDraw = fmt.Sprintf("LEVEL %d", g.currentLevel)
+	op = &text.DrawOptions{
+		LayoutOptions: text.LayoutOptions{
+			PrimaryAlign: text.AlignCenter,
+		},
+	}
+	op.ColorScale.ScaleWithColor(color.White)
+	op.GeoM.Translate(ScreenWidth/2, ScreenHeight-40)
+	text.Draw(screen, textToDraw, &text.GoTextFace{
+		Source: assets.LevelFont,
+		Size:   16,
+	}, op)
 }
 
 func (g *GameScene) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -182,8 +245,30 @@ func (g *GameScene) isPlayerDead(state *State) {
 	if g.playerIsDead {
 		g.player.livesRemaining--
 		if g.player.livesRemaining == 0 {
+			
+			if g.score > highScore {
+				highScore = g.score
+				if err := updateHighScore(highScore); err != nil {
+					log.Println("Error updating high score:", err)
+				}
+			}
+			
+			state.SceneManager.GoToScene(&GameOverScene{
+				game:        g,
+				meteors:     make(map[int]*Meteor),
+				meteorCount: 5,
+				stars:       GenerateStars(numberOfStars),
+			})
+		} else {
+			score := g.score
+			livesRemaining := g.player.livesRemaining
+			lifeSlice := g.player.lifeIndicators[:len(g.player.lifeIndicators)-1]
+			stars := g.stars
 			g.Reset()
-			state.SceneManager.GoToScene(g)
+			g.score = score
+			g.player.livesRemaining = livesRemaining
+			g.player.lifeIndicators = lifeSlice
+			g.stars = stars
 		}
 	}
 }
@@ -294,4 +379,5 @@ func (g *GameScene) Reset() {
 	g.exhaust = nil
 	g.space.RemoveAll()
 	g.space.Add(g.player.playerObj)
+	g.stars = GenerateStars(numberOfStars)
 }

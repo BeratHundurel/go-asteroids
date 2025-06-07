@@ -3,6 +3,7 @@ package goasteroids
 import (
 	"go-asteroids/assets"
 	"image/color"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -12,9 +13,26 @@ import (
 type TitleScene struct {
 	meteors     map[int]*Meteor
 	meteorCount int
+	stars       []*Star
+}
+
+var highScore int
+var originalHighScore int
+
+func init() {
+	hs, err := getHighScore()
+	if err != nil {
+		log.Println("Error getting high score", err)
+	}
+	highScore = hs
+	originalHighScore = highScore
 }
 
 func (t *TitleScene) Draw(screen *ebiten.Image) {
+	for _, s := range t.stars {
+		s.Draw(screen)
+	}
+
 	textToDraw := "1 coin 1 play"
 
 	op := &text.DrawOptions{
