@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/user"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -18,43 +19,47 @@ func HalfOfTheImage(image *ebiten.Image) (float64, float64) {
 	return halfW, halfH
 }
 
-func getHighScore() (int, error) {
+func getAppDataDir() (string, error) {
 	u, err := user.Current()
 	if err != nil {
-		return 0, err
+		return "", err
 	}
-	path := ""
+
 	switch runtime.GOOS {
 	case "darwin":
-		path = fmt.Sprintf("/Users/%s/Library/Application Support/Go Asteroids",
-			u.Username)
+		return filepath.Join(u.HomeDir, "Library", "Application Support", "Go Asteroids"), nil
 	case "windows":
-		path = fmt.Sprintf("C:\\Users\\%s\\AppData\\Go Asteroids",
-			u.Username)
+		return filepath.Join(u.HomeDir, "AppData", "Roaming", "Go Asteroids"), nil
 	default:
-		path = fmt.Sprintf("/users/%s", u.Username)
+		return filepath.Join(u.HomeDir, ".local", "share", "Go Asteroids"), nil
+	}
+}
+
+func getHighScore() (int, error) {
+	dir, err := getAppDataDir()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get app data directory: %w", err)
 	}
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		if err := os.Mkdir(path, 0750); err != nil {
-			return 0, fmt.Errorf("failed to create directory %s: %w", path, err)
-		}
+	// Create directory with all parent directories
+	if err := os.MkdirAll(dir, 0750); err != nil {
+		return 0, fmt.Errorf("failed to create directory %s: %w", dir, err)
 	}
 
-	if _, err := os.Stat(path + "/highscore.txt"); os.IsNotExist(err) {
-		err := os.WriteFile(path+"/highscore.txt", []byte("0"), 0750)
+	scoreFile := filepath.Join(dir, "highscore.txt")
+	if _, err := os.Stat(scoreFile); os.IsNotExist(err) {
+		err := os.WriteFile(scoreFile, []byte("0"), 0644)
 		if err != nil {
 			return 0, fmt.Errorf("failed to create highscore file: %w", err)
 		}
 	}
 
-	contents, err := os.ReadFile(path + "/highscore.txt")
+	contents, err := os.ReadFile(scoreFile)
 	if err != nil {
 		return 0, fmt.Errorf("failed to read highscore file: %w", err)
 	}
 
-	score := string(contents)
-	score = strings.TrimSpace(score)
+	score := strings.TrimSpace(string(contents))
 	s, err := strconv.Atoi(score)
 	if err != nil {
 		return 0, fmt.Errorf("failed to convert highscore to integer: %w", err)
@@ -63,24 +68,19 @@ func getHighScore() (int, error) {
 }
 
 func updateHighScore(score int) error {
-	u, err := user.Current()
+	dir, err := getAppDataDir()
 	if err != nil {
-		return err
-	}
-	path := ""
-	switch runtime.GOOS {
-	case "darwin":
-		path = fmt.Sprintf("/Users/%s/Library/Application Support/Go Asteroids/highscore.txt",
-			u.Username)
-	case "windows":
-		path = fmt.Sprintf("C:\\Users\\%s\\AppData\\Roaming\\Go Asteroids\\highscore.txt",
-			u.Username)
-	default:
-		path = fmt.Sprintf("/users/%s/highscore.txt", u.Username)
+		return fmt.Errorf("failed to get app data directory: %w", err)
 	}
 
+	// Ensure directory exists
+	if err := os.MkdirAll(dir, 0750); err != nil {
+		return fmt.Errorf("failed to create directory %s: %w", dir, err)
+	}
+
+	scoreFile := filepath.Join(dir, "highscore.txt")
 	s := fmt.Sprintf("%d", score)
-	err = os.WriteFile(path+"/highscore.txt", []byte(s), 0750)
+	err = os.WriteFile(scoreFile, []byte(s), 0644)
 	if err != nil {
 		return fmt.Errorf("failed to update highscore file: %w", err)
 	}
