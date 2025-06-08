@@ -120,6 +120,8 @@ func (g *GameScene) Update(state *State) error {
 
 	g.beatSound()
 
+	g.isLevelComplete(state)
+
 	return nil
 }
 
@@ -160,7 +162,7 @@ func (g *GameScene) Draw(screen *ebiten.Image) {
 		Source: assets.ScoreFont,
 		Size:   24,
 	}, op)
-	
+
 	if g.score > highScore {
 		highScore = g.score
 	}
@@ -194,6 +196,29 @@ func (g *GameScene) Draw(screen *ebiten.Image) {
 
 func (g *GameScene) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return outsideWidth, outsideHeight
+}
+
+func (g *GameScene) isLevelComplete(state *State) {
+	if g.meteorCount >= g.meteorsForLevel && len(g.meteors) == 0 {
+		g.baseVelocity = baseMeteorVelocity
+		g.currentLevel++
+
+		if g.currentLevel%5 == 0 {
+			if g.player.livesRemaining < 6 {
+				g.player.livesRemaining++
+				x := float64(20 + (len(g.player.lifeIndicators) * 50))
+				y := 20.0
+				g.player.lifeIndicators = append(g.player.lifeIndicators, NewLifeIndicator(Vector{X: x, Y: y}, 0))
+			}
+		}
+
+		g.beatWaitTime = baseBeatWaitTime
+		state.SceneManager.GoToScene(&LevelStartScene{
+			game:           g,
+			nextLevelTimer: NewTimer(time.Second * 2),
+			stars:          GenerateStars(numberOfStars),
+		})
+	}
 }
 
 func (g *GameScene) beatSound() {
@@ -245,14 +270,14 @@ func (g *GameScene) isPlayerDead(state *State) {
 	if g.playerIsDead {
 		g.player.livesRemaining--
 		if g.player.livesRemaining == 0 {
-			
+
 			if g.score > highScore {
 				highScore = g.score
 				if err := updateHighScore(highScore); err != nil {
 					log.Println("Error updating high score:", err)
 				}
 			}
-			
+
 			state.SceneManager.GoToScene(&GameOverScene{
 				game:        g,
 				meteors:     make(map[int]*Meteor),
