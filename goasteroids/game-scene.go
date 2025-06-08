@@ -159,6 +159,12 @@ func (g *GameScene) Draw(screen *ebiten.Image) {
 		}
 	}
 
+	if len(g.player.shieldIndicators) > 0 {
+		for _, si := range g.player.shieldIndicators {
+			si.Draw(screen)
+		}
+	}
+
 	textToDraw := fmt.Sprintf("%06d", g.score)
 	op := &text.DrawOptions{
 		LayoutOptions: text.LayoutOptions{
@@ -305,12 +311,14 @@ func (g *GameScene) isPlayerDead(state *State) {
 			lifeSlice := g.player.lifeIndicators[:len(g.player.lifeIndicators)-1]
 			stars := g.stars
 			shieldsRemaining := g.player.shieldRemaining
+			shieldIndicatorSlice := g.player.shieldIndicators
 			g.Reset()
 			g.score = score
 			g.player.livesRemaining = livesRemaining
 			g.player.lifeIndicators = lifeSlice
 			g.stars = stars
 			g.player.shieldRemaining = shieldsRemaining
+			g.player.shieldIndicators = shieldIndicatorSlice
 		}
 	}
 }
@@ -388,10 +396,26 @@ func (g *GameScene) isPlayerCollidingWithMeteor() {
 				}
 				break
 			} else {
-
+				g.bounceMeteor(m)
 			}
 		}
 	}
+}
+
+func (g *GameScene) bounceMeteor(m *Meteor) {
+	direction := Vector{
+		X: (ScreenWidth/2 - m.position.X) * -1,
+		Y: (ScreenHeight/2 - m.position.Y) * -1,
+	}
+	normalizeDirection := direction.Normalize()
+	velocity := g.baseVelocity
+
+	movement := Vector{
+		X: normalizeDirection.X * velocity,
+		Y: normalizeDirection.Y * velocity,
+	}
+
+	m.movement = movement
 }
 
 func (g *GameScene) cleanUp() {
@@ -423,4 +447,5 @@ func (g *GameScene) Reset() {
 	g.space.Add(g.player.playerObj)
 	g.stars = GenerateStars(numberOfStars)
 	g.player.shieldRemaining = numberOfShields
+	g.player.isShielded = false
 }
