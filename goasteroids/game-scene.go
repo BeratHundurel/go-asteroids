@@ -164,6 +164,10 @@ func (g *GameScene) Draw(screen *ebiten.Image) {
 			si.Draw(screen)
 		}
 	}
+	
+	if g.player.hyperSpaceTimer == nil || g.player.hyperSpaceTimer.IsReady() {
+		g.player.hyperSpaceIndicator.Draw(screen)
+	}
 
 	textToDraw := fmt.Sprintf("%06d", g.score)
 	op := &text.DrawOptions{
