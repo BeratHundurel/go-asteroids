@@ -38,7 +38,7 @@ func (o *GameOverScene) Draw(screen *ebiten.Image) {
 		Source: assets.TitleFont,
 		Size:   48,
 	}, op)
-
+	
 	if o.game.score > originalHighScore {
 		textToDraw = "New High Score!"
 		op = &text.DrawOptions{

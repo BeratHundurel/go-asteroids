@@ -55,6 +55,8 @@ type GameScene struct {
 	playBeatOne          bool
 	stars                []*Star
 	currentLevel         int
+	shield               *Shield
+	shieldsUpPlayer      *audio.Player
 }
 
 func NewGameScene() *GameScene {
@@ -88,6 +90,7 @@ func NewGameScene() *GameScene {
 	g.explosionPlayer, _ = g.audioContext.NewPlayer(assets.ExplosionSound)
 	g.beatOnePlayer, _ = g.audioContext.NewPlayer(assets.BeatOneSound)
 	g.beatTwoPlayer, _ = g.audioContext.NewPlayer(assets.BeatTwoSound)
+	g.shieldsUpPlayer, _ = g.audioContext.NewPlayer(assets.ShieldSound)
 	return g
 }
 
@@ -95,6 +98,8 @@ func (g *GameScene) Update(state *State) error {
 	g.player.Update()
 
 	g.updateExhaust()
+
+	g.updateShield()
 
 	g.isPlayerDying()
 
@@ -134,6 +139,10 @@ func (g *GameScene) Draw(screen *ebiten.Image) {
 
 	if g.exhaust != nil {
 		g.exhaust.Draw(screen)
+	}
+
+	if g.shield != nil {
+		g.shield.Draw(screen)
 	}
 
 	for _, m := range g.meteors {
@@ -196,6 +205,12 @@ func (g *GameScene) Draw(screen *ebiten.Image) {
 
 func (g *GameScene) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return outsideWidth, outsideHeight
+}
+
+func (g *GameScene) updateShield() {
+	if g.shield != nil {
+		g.shield.Update()
+	}
 }
 
 func (g *GameScene) isLevelComplete(state *State) {
@@ -271,7 +286,7 @@ func (g *GameScene) isPlayerDead(state *State) {
 		g.player.livesRemaining--
 		if g.player.livesRemaining == 0 {
 
-			if g.score > highScore {
+			if g.score >= highScore {
 				highScore = g.score
 				if err := updateHighScore(highScore); err != nil {
 					log.Println("Error updating high score:", err)
@@ -289,11 +304,13 @@ func (g *GameScene) isPlayerDead(state *State) {
 			livesRemaining := g.player.livesRemaining
 			lifeSlice := g.player.lifeIndicators[:len(g.player.lifeIndicators)-1]
 			stars := g.stars
+			shieldsRemaining := g.player.shieldRemaining
 			g.Reset()
 			g.score = score
 			g.player.livesRemaining = livesRemaining
 			g.player.lifeIndicators = lifeSlice
 			g.stars = stars
+			g.player.shieldRemaining = shieldsRemaining
 		}
 	}
 }
@@ -405,4 +422,5 @@ func (g *GameScene) Reset() {
 	g.space.RemoveAll()
 	g.space.Add(g.player.playerObj)
 	g.stars = GenerateStars(numberOfStars)
+	g.player.shieldRemaining = numberOfShields
 }
