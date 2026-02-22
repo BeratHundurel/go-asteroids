@@ -14,7 +14,7 @@ import (
 type TitleScene struct {
 	meteors     map[int]*Meteor
 	meteorCount int
-	stars       []*Star
+	starField   *ebiten.Image
 }
 
 var highScore int
@@ -30,9 +30,7 @@ func init() {
 }
 
 func (t *TitleScene) Draw(screen *ebiten.Image) {
-	for _, s := range t.stars {
-		s.Draw(screen)
-	}
+	screen.DrawImage(t.starField, nil)
 
 	textToDraw := "1 coin 1 play"
 

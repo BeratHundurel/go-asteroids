@@ -18,8 +18,8 @@ func (g *Game) Update() error {
 	if (g.sceneManager) == nil {
 		g.sceneManager = &SceneManager{}
 		g.sceneManager.GoToScene(&TitleScene{
-			meteors: make(map[int]*Meteor),
-			stars:   GenerateStars(numberOfStars),
+			meteors:   make(map[int]*Meteor),
+			starField: RenderStarField(numberOfStars),
 		})
 	}
 

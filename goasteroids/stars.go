@@ -31,7 +31,7 @@ func (s *Star) Draw(screen *ebiten.Image) {
 		B: uint8(0xff * s.brightness / 0xff),
 		A: 0xff,
 	}
-	vector.DrawFilledCircle(screen, s.x, s.y, s.r, c, true)
+	vector.FillCircle(screen, s.x, s.y, s.r, c, false)
 }
 
 func (s *Star) Update() {}
@@ -42,4 +42,14 @@ func GenerateStars(n int) []*Star {
 		stars[i] = NewStar()
 	}
 	return stars
+}
+
+// RenderStarField pre-renders n randomly generated stars onto a single
+// ScreenWidth x ScreenHeight image.
+func RenderStarField(n int) *ebiten.Image {
+	img := ebiten.NewImage(ScreenWidth, ScreenHeight)
+	for range n {
+		NewStar().Draw(img)
+	}
+	return img
 }

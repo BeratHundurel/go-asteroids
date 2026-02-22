@@ -23,7 +23,8 @@ type Meteor struct {
 	angle         float64
 	rotationSpeed float64
 	sprite        *ebiten.Image
-	meteorObj     *resolv.Circle 
+	meteorObj     *resolv.Circle
+	radius        float64
 }
 
 func NewMeteor(baseVelocity float64, g *GameScene, index int) *Meteor {
@@ -67,6 +68,7 @@ func NewMeteor(baseVelocity float64, g *GameScene, index int) *Meteor {
 		angle:         angle,
 		sprite:        sprite,
 		meteorObj:     meteorObj,
+		radius:        float64(sprite.Bounds().Dx()) / 2,
 	}
 
 	m.meteorObj.SetPosition(pos.X, pos.Y)
@@ -118,6 +120,7 @@ func NewSmallMeteor(baseVelocity float64, g *GameScene, index int) *Meteor {
 		sprite:        sprite,
 		angle:         angle,
 		meteorObj:     meteorObj,
+		radius:        float64(sprite.Bounds().Dx()) / 2,
 	}
 
 	m.meteorObj.SetPosition(pos.X, pos.Y)

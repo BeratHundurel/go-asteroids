@@ -93,17 +93,21 @@ func updateHighScore(score int) error {
 // collision normal (elastic collision). The physics body position is also
 // synced after every push, keeping resolv in step with the logical position.
 func separateMeteors(meteors []*Meteor) {
-	for i := range meteors {
-		for j := i + 1; j < len(meteors); j++ {
-			m1, m2 := meteors[i], meteors[j]
+	n := len(meteors)
+	if n < 2 {
+		return
+	}
+
+	for i := range n {
+		m1 := meteors[i]
+		r1 := m1.radius
+		for j := i + 1; j < n; j++ {
+			m2 := meteors[j]
 
 			dx := m2.position.X - m1.position.X
 			dy := m2.position.Y - m1.position.Y
 			distSq := dx*dx + dy*dy
-
-			r1 := float64(m1.sprite.Bounds().Dx()) / 2
-			r2 := float64(m2.sprite.Bounds().Dx()) / 2
-			minDist := r1 + r2
+			minDist := r1 + m2.radius
 
 			if distSq == 0 || distSq >= minDist*minDist {
 				continue

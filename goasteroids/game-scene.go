@@ -60,7 +60,7 @@ type GameScene struct {
 	beatTimer            *Timer
 	beatWaitTime         int
 	playBeatOne          bool
-	stars                []*Star
+	starField            *ebiten.Image
 	currentLevel         int
 	shield               *Shield
 	shieldsUpPlayer      *audio.Player
@@ -100,7 +100,7 @@ func NewGameScene() *GameScene {
 	}
 	g.player = NewPlayer(g)
 	g.space.Add(g.player.playerObj)
-	g.stars = GenerateStars(numberOfStars)
+	g.starField = RenderStarField(numberOfStars)
 
 	g.explosionFrames = assets.Explosion
 	g.audioContext = audio.NewContext(48000)
@@ -183,9 +183,7 @@ func (g *GameScene) Update(state *State) error {
 }
 
 func (g *GameScene) Draw(screen *ebiten.Image) {
-	for _, s := range g.stars {
-		s.Draw(screen)
-	}
+	screen.DrawImage(g.starField, nil)
 
 	g.player.Draw(screen)
 
@@ -438,7 +436,7 @@ func (g *GameScene) isLevelComplete(state *State) {
 		state.SceneManager.GoToScene(&LevelStartScene{
 			game:           g,
 			nextLevelTimer: NewTimer(time.Second * 2),
-			stars:          GenerateStars(numberOfStars),
+			starField:      RenderStarField(numberOfStars),
 		})
 	}
 }
@@ -504,20 +502,20 @@ func (g *GameScene) isPlayerDead(state *State) {
 				game:        g,
 				meteors:     make(map[int]*Meteor),
 				meteorCount: 5,
-				stars:       GenerateStars(numberOfStars),
+				starField:   RenderStarField(numberOfStars),
 			})
 		} else {
 			score := g.score
 			livesRemaining := g.player.livesRemaining
 			lifeSlice := g.player.lifeIndicators[:len(g.player.lifeIndicators)-1]
-			stars := g.stars
+			starField := g.starField
 			shieldsRemaining := g.player.shieldRemaining
 			shieldIndicatorSlice := g.player.shieldIndicators
 			g.Reset()
 			g.score = score
 			g.player.livesRemaining = livesRemaining
 			g.player.lifeIndicators = lifeSlice
-			g.stars = stars
+			g.starField = starField
 			g.player.shieldRemaining = shieldsRemaining
 			g.player.shieldIndicators = shieldIndicatorSlice
 		}
@@ -652,7 +650,6 @@ func (g *GameScene) separateOverlappingMeteors() {
 }
 
 func (g *GameScene) Reset() {
-
 	g.player = NewPlayer(g)
 	g.meteors = make(map[int]*Meteor)
 	g.meteorCount = 0
@@ -666,7 +663,7 @@ func (g *GameScene) Reset() {
 	g.exhaust = nil
 	g.space.RemoveAll()
 	g.space.Add(g.player.playerObj)
-	g.stars = GenerateStars(numberOfStars)
+	g.starField = RenderStarField(numberOfStars)
 	g.player.shieldRemaining = numberOfShields
 	g.player.isShielded = false
 	g.aliens = make(map[int]*Alien)

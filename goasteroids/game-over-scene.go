@@ -4,7 +4,6 @@ import (
 	"go-asteroids/assets"
 	"image/color"
 	"os"
-	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -15,21 +14,14 @@ type GameOverScene struct {
 	game        *GameScene
 	meteors     map[int]*Meteor
 	meteorCount int
-	stars       []*Star
+	starField   *ebiten.Image
 }
 
 func (o *GameOverScene) Draw(screen *ebiten.Image) {
-	for _, s := range o.stars {
-		s.Draw(screen)
-	}
+	screen.DrawImage(o.starField, nil)
 
-	meteorKeys := make([]int, 0, len(o.meteors))
-	for k := range o.meteors {
-		meteorKeys = append(meteorKeys, k)
-	}
-	sort.Ints(meteorKeys)
-	for _, k := range meteorKeys {
-		o.meteors[k].Draw(screen)
+	for _, m := range o.meteors {
+		m.Draw(screen)
 	}
 
 	textToDraw := "Game Over Press Space to Restart"

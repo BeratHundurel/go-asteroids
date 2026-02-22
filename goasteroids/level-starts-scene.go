@@ -13,13 +13,11 @@ import (
 type LevelStartScene struct {
 	game           *GameScene
 	nextLevelTimer *Timer
-	stars          []*Star
+	starField      *ebiten.Image
 }
 
 func (l *LevelStartScene) Draw(screen *ebiten.Image) {
-	for _, s := range l.stars {
-		s.Draw(screen)
-	}
+	screen.DrawImage(l.starField, nil)
 
 	textToDraw := fmt.Sprintf("Level %d", l.game.currentLevel)
 	op := &text.DrawOptions{
@@ -46,8 +44,8 @@ func (l *LevelStartScene) Update(state *State) error {
 		}
 		state.SceneManager.GoToScene(l.game)
 	}
-	
-	if inpututil.IsKeyJustPressed(ebiten.KeySpace){
+
+	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		l.game.meteorsForLevel += 2
 		l.game.meteorCount = 0
 		for k, v := range l.game.lasers {
@@ -56,6 +54,6 @@ func (l *LevelStartScene) Update(state *State) error {
 		}
 		state.SceneManager.GoToScene(l.game)
 	}
-	
+
 	return nil
 }
