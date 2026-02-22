@@ -28,7 +28,6 @@ func NewAlien(baseVelocity float64, g *GameScene) *Alien {
 
 	switch alienType {
 	case 0:
-		// Stupid alien that comes in from the right and shoots in random directions.
 		x := float64(ScreenWidth + 100)
 		y := float64(rand.Intn(ScreenHeight-100) + 100)
 
@@ -60,7 +59,6 @@ func NewAlien(baseVelocity float64, g *GameScene) *Alien {
 
 		alien.alienObj.SetPosition(pos.X, pos.Y)
 	case 1:
-		// Stupid alien that comes in from the left and shoots in random directions.
 		x := -100.0
 		y := float64(rand.Intn(ScreenHeight-100) + 100)
 
@@ -149,8 +147,9 @@ func (a *Alien) Update() {
 func (a *Alien) Draw(screen *ebiten.Image) {
 	halfW, halfH := HalfOfTheImage(a.sprite)
 
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-halfW, -halfH)
-	op.GeoM.Translate(a.position.X, a.position.Y)
-	screen.DrawImage(a.sprite, op)
+	sharedDrawOp.GeoM.Reset()
+	sharedDrawOp.GeoM.Translate(-halfW, -halfH)
+	sharedDrawOp.GeoM.Translate(a.position.X, a.position.Y)
+	
+	screen.DrawImage(a.sprite, sharedDrawOp)
 }

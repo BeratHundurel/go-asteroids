@@ -54,13 +54,11 @@ func (s *Shield) Update() {
 func (s *Shield) Draw(screen *ebiten.Image) {
 	halfW, halfH := HalfOfTheImage(s.sprite)
 
-	op := &ebiten.DrawImageOptions{}
+	sharedDrawOp.GeoM.Reset()
+	sharedDrawOp.GeoM.Translate(-halfW, -halfH)
+	sharedDrawOp.GeoM.Rotate(s.rotation)
+	sharedDrawOp.GeoM.Translate(halfW, halfH)
+	sharedDrawOp.GeoM.Translate(s.position.X, s.position.Y)
 
-	op.GeoM.Translate(-halfW, -halfH)
-	op.GeoM.Rotate(s.rotation)
-	op.GeoM.Translate(halfW, halfH)
-	
-	op.GeoM.Translate(s.position.X, s.position.Y)
-	
-	screen.DrawImage(s.sprite, op)
+	screen.DrawImage(s.sprite, sharedDrawOp)
 }

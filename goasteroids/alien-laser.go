@@ -30,7 +30,7 @@ func NewAlienLaser(position Vector, rotation float64) *AlienLaser {
 	al := &AlienLaser{
 		position: position,
 		rotation: rotation,
-		sprite: sprite,
+		sprite:   sprite,
 		laserObj: resolv.NewRectangle(position.X, position.Y, float64(sprite.Bounds().Dx()), float64(sprite.Bounds().Dy())),
 	}
 	al.laserObj.SetPosition(position.X, position.Y)
@@ -51,10 +51,10 @@ func (al *AlienLaser) Update() {
 func (al *AlienLaser) Draw(screen *ebiten.Image) {
 	halfW, halfH := HalfOfTheImage(al.sprite)
 
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-halfW, -halfH)
-	op.GeoM.Rotate(al.rotation)
-	op.GeoM.Translate(al.position.X, al.position.Y)
+	sharedDrawOp.GeoM.Reset()
+	sharedDrawOp.GeoM.Translate(-halfW, -halfH)
+	sharedDrawOp.GeoM.Rotate(al.rotation)
+	sharedDrawOp.GeoM.Translate(al.position.X, al.position.Y)
 
-	screen.DrawImage(al.sprite, op)
+	screen.DrawImage(al.sprite, sharedDrawOp)
 }

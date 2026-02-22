@@ -11,7 +11,17 @@ import (
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
+
+// sharedDrawOp is a reusable DrawImageOptions that eliminates per-frame heap
+// allocations in entity Draw methods. Always call sharedDrawOp.GeoM.Reset()
+// before use. Safe because ebiten copies all options at DrawImage call time
+// and all Draw calls happen on a single goroutine.
+var sharedDrawOp = &ebiten.DrawImageOptions{}
+
+// sharedColormDrawOp is the colorm equivalent of sharedDrawOp.
+var sharedColormDrawOp = &colorm.DrawImageOptions{}
 
 func HalfOfTheImage(image *ebiten.Image) (float64, float64) {
 	bounds := image.Bounds()

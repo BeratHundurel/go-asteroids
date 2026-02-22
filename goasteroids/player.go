@@ -114,13 +114,13 @@ func NewPlayer(game *GameScene) *Player {
 func (p *Player) Draw(screen *ebiten.Image) {
 	halfW, halfH := HalfOfTheImage(p.sprite)
 
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-halfW, -halfH)
-	op.GeoM.Rotate(p.rotation)
-	op.GeoM.Translate(halfW, halfH)
-	op.GeoM.Translate(p.position.X, p.position.Y)
+	sharedDrawOp.GeoM.Reset()
+	sharedDrawOp.GeoM.Translate(-halfW, -halfH)
+	sharedDrawOp.GeoM.Rotate(p.rotation)
+	sharedDrawOp.GeoM.Translate(halfW, halfH)
+	sharedDrawOp.GeoM.Translate(p.position.X, p.position.Y)
 
-	screen.DrawImage(p.sprite, op)
+	screen.DrawImage(p.sprite, sharedDrawOp)
 }
 
 func (p *Player) Update() {

@@ -8,7 +8,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
-	"sort"
+
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -195,13 +195,8 @@ func (g *GameScene) Draw(screen *ebiten.Image) {
 		g.shield.Draw(screen)
 	}
 
-	meteorKeys := make([]int, 0, len(g.meteors))
-	for k := range g.meteors {
-		meteorKeys = append(meteorKeys, k)
-	}
-	sort.Ints(meteorKeys)
-	for _, k := range meteorKeys {
-		g.meteors[k].Draw(screen)
+	for _, m := range g.meteors {
+		m.Draw(screen)
 	}
 
 	for _, l := range g.lasers {

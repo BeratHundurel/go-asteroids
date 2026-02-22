@@ -59,11 +59,11 @@ func (l *Laser) Update() {
 func (l *Laser) Draw(screen *ebiten.Image) {
 	halfW, halfH := HalfOfTheImage(l.sprite)
 
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-halfW, -halfH)
-	op.GeoM.Rotate(l.rotation)
-	op.GeoM.Translate(halfW, halfH)
-	op.GeoM.Translate(l.position.X, l.position.Y)
+	sharedDrawOp.GeoM.Reset()
+	sharedDrawOp.GeoM.Translate(-halfW, -halfH)
+	sharedDrawOp.GeoM.Rotate(l.rotation)
+	sharedDrawOp.GeoM.Translate(halfW, halfH)
+	sharedDrawOp.GeoM.Translate(l.position.X, l.position.Y)
 
-	screen.DrawImage(l.sprite, op)
+	screen.DrawImage(l.sprite, sharedDrawOp)
 }

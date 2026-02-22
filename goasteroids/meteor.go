@@ -145,13 +145,13 @@ func (m *Meteor) Update() {
 func (m *Meteor) Draw(screen *ebiten.Image) {
 	halW, halfH := HalfOfTheImage(m.sprite)
 
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-halfH, -halW)
-	op.GeoM.Rotate(m.rotation)
-	op.GeoM.Translate(halfH, halW)
-	op.GeoM.Translate(m.position.X, m.position.Y)
+	sharedDrawOp.GeoM.Reset()
+	sharedDrawOp.GeoM.Translate(-halfH, -halW)
+	sharedDrawOp.GeoM.Rotate(m.rotation)
+	sharedDrawOp.GeoM.Translate(halfH, halW)
+	sharedDrawOp.GeoM.Translate(m.position.X, m.position.Y)
 
-	screen.DrawImage(m.sprite, op)
+	screen.DrawImage(m.sprite, sharedDrawOp)
 }
 
 func (m *Meteor) keepOnScreen() {

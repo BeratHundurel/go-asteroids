@@ -24,20 +24,20 @@ func NewExhaust(position Vector, rotation float64) *Exhaust {
 	return &Exhaust{
 		position: position,
 		rotation: rotation,
-		sprite: sprite,
+		sprite:   sprite,
 	}
 }
 
 func (e *Exhaust) Draw(screen *ebiten.Image) {
 	halfW, halfH := HalfOfTheImage(assets.ExhaustSprite)
 
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-halfW, -halfH)
-	op.GeoM.Rotate(e.rotation)
-	op.GeoM.Translate(halfW, halfH)
-	op.GeoM.Translate(e.position.X, e.position.Y)
+	sharedDrawOp.GeoM.Reset()
+	sharedDrawOp.GeoM.Translate(-halfW, -halfH)
+	sharedDrawOp.GeoM.Rotate(e.rotation)
+	sharedDrawOp.GeoM.Translate(halfW, halfH)
+	sharedDrawOp.GeoM.Translate(e.position.X, e.position.Y)
 
-	screen.DrawImage(e.sprite, op)
+	screen.DrawImage(e.sprite, sharedDrawOp)
 }
 
 func (e *Exhaust) Update() {
@@ -45,5 +45,3 @@ func (e *Exhaust) Update() {
 	e.position.X += math.Sin(e.rotation) * speed
 	e.position.Y += math.Cos(e.rotation) * -speed
 }
-
-
