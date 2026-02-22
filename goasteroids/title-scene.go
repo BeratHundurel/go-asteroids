@@ -67,5 +67,16 @@ func (t *TitleScene) Update(state *State) error {
 	for _, m := range t.meteors {
 		m.Update()
 	}
+
+	t.separateOverlappingMeteors()
+
 	return nil
+}
+
+func (t *TitleScene) separateOverlappingMeteors() {
+	list := make([]*Meteor, 0, len(t.meteors))
+	for _, m := range t.meteors {
+		list = append(list, m)
+	}
+	separateMeteors(list)
 }

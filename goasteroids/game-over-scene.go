@@ -4,6 +4,7 @@ import (
 	"go-asteroids/assets"
 	"image/color"
 	"os"
+	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -22,8 +23,13 @@ func (o *GameOverScene) Draw(screen *ebiten.Image) {
 		s.Draw(screen)
 	}
 
-	for _, m := range o.meteors {
-		m.Draw(screen)
+	meteorKeys := make([]int, 0, len(o.meteors))
+	for k := range o.meteors {
+		meteorKeys = append(meteorKeys, k)
+	}
+	sort.Ints(meteorKeys)
+	for _, k := range meteorKeys {
+		o.meteors[k].Draw(screen)
 	}
 
 	textToDraw := "Game Over Press Space to Restart"
@@ -38,7 +44,7 @@ func (o *GameOverScene) Draw(screen *ebiten.Image) {
 		Source: assets.TitleFont,
 		Size:   48,
 	}, op)
-	
+
 	if o.game.score > originalHighScore {
 		textToDraw = "New High Score!"
 		op = &text.DrawOptions{
@@ -66,6 +72,8 @@ func (o *GameOverScene) Update(state *State) error {
 		m.Update()
 	}
 
+	o.separateOverlappingMeteors()
+
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		o.game.Reset()
 		state.SceneManager.GoToScene(o.game)
@@ -76,4 +84,12 @@ func (o *GameOverScene) Update(state *State) error {
 	}
 
 	return nil
+}
+
+func (o *GameOverScene) separateOverlappingMeteors() {
+	list := make([]*Meteor, 0, len(o.meteors))
+	for _, m := range o.meteors {
+		list = append(list, m)
+	}
+	separateMeteors(list)
 }

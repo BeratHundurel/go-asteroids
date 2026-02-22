@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"sort"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -144,6 +145,8 @@ func (g *GameScene) Update(state *State) error {
 		m.Update()
 	}
 
+	g.separateOverlappingMeteors()
+
 	for _, l := range g.lasers {
 		l.Update()
 	}
@@ -188,8 +191,13 @@ func (g *GameScene) Draw(screen *ebiten.Image) {
 		g.shield.Draw(screen)
 	}
 
-	for _, m := range g.meteors {
-		m.Draw(screen)
+	meteorKeys := make([]int, 0, len(g.meteors))
+	for k := range g.meteors {
+		meteorKeys = append(meteorKeys, k)
+	}
+	sort.Ints(meteorKeys)
+	for _, k := range meteorKeys {
+		g.meteors[k].Draw(screen)
 	}
 
 	for _, l := range g.lasers {
@@ -625,7 +633,20 @@ func (g *GameScene) cleanUp() {
 	}
 }
 
+func (g *GameScene) separateOverlappingMeteors() {
+	meteorList := make([]*Meteor, 0, len(g.meteors))
+	for _, m := range g.meteors {
+		// Skip meteors that are already exploding
+		if m.sprite == g.explosionSprite || m.sprite == g.explosionSmallSprite {
+			continue
+		}
+		meteorList = append(meteorList, m)
+	}
+	separateMeteors(meteorList)
+}
+
 func (g *GameScene) Reset() {
+
 	g.player = NewPlayer(g)
 	g.meteors = make(map[int]*Meteor)
 	g.meteorCount = 0

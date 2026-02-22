@@ -2,6 +2,7 @@ package goasteroids
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -85,4 +86,54 @@ func updateHighScore(score int) error {
 		return fmt.Errorf("failed to update highscore file: %w", err)
 	}
 	return nil
+}
+
+// separateMeteors resolves overlaps between a slice of meteors by pushing
+// each overlapping pair apart and reflecting their velocities along the
+// collision normal (elastic collision). The physics body position is also
+// synced after every push, keeping resolv in step with the logical position.
+func separateMeteors(meteors []*Meteor) {
+	for i := range meteors {
+		for j := i + 1; j < len(meteors); j++ {
+			m1, m2 := meteors[i], meteors[j]
+
+			dx := m2.position.X - m1.position.X
+			dy := m2.position.Y - m1.position.Y
+			distSq := dx*dx + dy*dy
+
+			r1 := float64(m1.sprite.Bounds().Dx()) / 2
+			r2 := float64(m2.sprite.Bounds().Dx()) / 2
+			minDist := r1 + r2
+
+			if distSq == 0 || distSq >= minDist*minDist {
+				continue
+			}
+
+			dist := math.Sqrt(distSq)
+			// Collision normal
+			nx, ny := dx/dist, dy/dist
+
+			// Push both meteors apart so they no longer overlap
+			overlap := (minDist - dist) / 2
+			m1.position.X -= nx * overlap
+			m1.position.Y -= ny * overlap
+			m2.position.X += nx * overlap
+			m2.position.Y += ny * overlap
+			m1.meteorObj.SetPosition(m1.position.X, m1.position.Y)
+			m2.meteorObj.SetPosition(m2.position.X, m2.position.Y)
+
+			// Elastic collision: exchange velocity components along the collision normal
+			dvx := m1.movement.X - m2.movement.X
+			dvy := m1.movement.Y - m2.movement.Y
+			dot := dvx*nx + dvy*ny
+
+			// Only swap if the meteors are actually moving toward each other
+			if dot > 0 {
+				m1.movement.X -= dot * nx
+				m1.movement.Y -= dot * ny
+				m2.movement.X += dot * nx
+				m2.movement.Y += dot * ny
+			}
+		}
+	}
 }
