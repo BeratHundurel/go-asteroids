@@ -1,0 +1,18 @@
+.git
+.gitattributes
+.gitignore
+
+# Existing compiled artifacts — Docker will build fresh ones
+wasm/goasteroids.wasm
+wasm/wasm_exec.js
+*.exe
+*.exe.bak
+
+# Windows resource files not needed in the image
+winres/
+
+# Editor and OS noise
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db

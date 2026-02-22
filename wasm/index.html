@@ -1,213 +1,315 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Go Asteroids</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+        />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Asteroids - Berat Hündürel</title>
+        <meta
+            name="description"
+            content="Play Asteroids - A classic arcade game built with Go and WebAssembly by Berat Hündürel"
+        />
+        <meta name="author" content="Berat Hündürel" />
+        <meta property="og:title" content="Asteroids - Berat Hündürel" />
+        <meta
+            property="og:description"
+            content="Play Asteroids - A classic arcade game built with Go and WebAssembly"
+        />
+        <meta property="og:type" content="website" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-        html, body {
-            height: 100%;
-            overflow: hidden;
-        }
+            html,
+            body {
+                height: 100%;
+                overflow: hidden;
+            }
 
-        body {
-            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-family: 'Orbitron', monospace;
-            position: relative;
-        }
+            body {
+                background: linear-gradient(
+                    135deg,
+                    #0a0a0f 0%,
+                    #1a1a2e 50%,
+                    #0a0a0f 100%
+                );
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                font-family: "Orbitron", monospace;
+                position: relative;
+            }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(2px 2px at 20px 30px, #ffffff, transparent),
-                radial-gradient(2px 2px at 40px 70px, #ffffff, transparent),
-                radial-gradient(1px 1px at 90px 40px, #ffffff, transparent),
-                radial-gradient(2px 2px at 160px 120px, #ffffff, transparent),
-                radial-gradient(1px 1px at 230px 80px, #ffffff, transparent),
-                radial-gradient(2px 2px at 300px 150px, #ffffff, transparent),
-                radial-gradient(1px 1px at 400px 60px, #ffffff, transparent),
-                radial-gradient(2px 2px at 500px 180px, #ffffff, transparent),
-                radial-gradient(1px 1px at 600px 100px, #ffffff, transparent),
-                radial-gradient(2px 2px at 700px 200px, #ffffff, transparent),
-                radial-gradient(1px 1px at 800px 50px, #ffffff, transparent),
-                radial-gradient(2px 2px at 900px 160px, #ffffff, transparent);
-            background-repeat: repeat;
-            background-size: 1000px 300px;
-            animation: twinkle 8s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 0;
-        }
+            body::before {
+                content: "";
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-image:
+                    radial-gradient(2px 2px at 20px 30px, #ffffff, transparent),
+                    radial-gradient(2px 2px at 40px 70px, #ffffff, transparent),
+                    radial-gradient(1px 1px at 90px 40px, #ffffff, transparent),
+                    radial-gradient(
+                        2px 2px at 160px 120px,
+                        #ffffff,
+                        transparent
+                    ),
+                    radial-gradient(
+                        1px 1px at 230px 80px,
+                        #ffffff,
+                        transparent
+                    ),
+                    radial-gradient(
+                        2px 2px at 300px 150px,
+                        #ffffff,
+                        transparent
+                    ),
+                    radial-gradient(
+                        1px 1px at 400px 60px,
+                        #ffffff,
+                        transparent
+                    ),
+                    radial-gradient(
+                        2px 2px at 500px 180px,
+                        #ffffff,
+                        transparent
+                    ),
+                    radial-gradient(
+                        1px 1px at 600px 100px,
+                        #ffffff,
+                        transparent
+                    ),
+                    radial-gradient(
+                        2px 2px at 700px 200px,
+                        #ffffff,
+                        transparent
+                    ),
+                    radial-gradient(
+                        1px 1px at 800px 50px,
+                        #ffffff,
+                        transparent
+                    ),
+                    radial-gradient(
+                        2px 2px at 900px 160px,
+                        #ffffff,
+                        transparent
+                    );
+                background-repeat: repeat;
+                background-size: 1000px 300px;
+                animation: twinkle 8s ease-in-out infinite;
+                pointer-events: none;
+                z-index: 0;
+            }
 
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 0.6; }
-        }
+            @keyframes twinkle {
+                0%,
+                100% {
+                    opacity: 0.3;
+                }
+                50% {
+                    opacity: 0.6;
+                }
+            }
 
-        header {
-            text-align: center;
-            padding: 1rem 1rem 0.5rem;
-            z-index: 1;
-            flex-shrink: 0;
-        }
+            header {
+                text-align: center;
+                padding: 1rem 1rem 0.5rem;
+                z-index: 1;
+                flex-shrink: 0;
+            }
 
-        h1 {
-            font-size: clamp(1.5rem, 4vw, 2.5rem);
-            font-weight: 900;
-            background: linear-gradient(180deg, #ffffff 0%, #a0a0a0 50%, #ffffff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 0.2em;
-            margin-bottom: 0.25rem;
-        }
+            h1 {
+                font-size: clamp(1.5rem, 4vw, 2.5rem);
+                font-weight: 900;
+                background: linear-gradient(
+                    180deg,
+                    #ffffff 0%,
+                    #a0a0a0 50%,
+                    #ffffff 100%
+                );
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                letter-spacing: 0.2em;
+                margin-bottom: 0.25rem;
+            }
 
-        .subtitle {
-            font-size: clamp(0.6rem, 1.5vw, 0.75rem);
-            color: #4a9eff;
-            letter-spacing: 0.3em;
-            text-transform: uppercase;
-        }
+            .subtitle {
+                font-size: clamp(0.6rem, 1.5vw, 0.75rem);
+                color: #4a9eff;
+                letter-spacing: 0.3em;
+                text-transform: uppercase;
+            }
 
-        .game-container {
-            flex: 1;
-            width: 90%;
-            max-width: 1100px;
-            z-index: 1;
-            padding: 0.5rem 1rem;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-        }
+            .game-container {
+                flex: 1;
+                width: 90%;
+                max-width: 1100px;
+                z-index: 1;
+                padding: 0.5rem 1rem;
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+            }
 
-        .game-wrapper {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            border: 1px solid rgba(74, 158, 255, 0.25);
-            border-radius: 4px;
-            overflow: hidden;
-            background: #000;
-            box-shadow: 0 0 15px rgba(74, 158, 255, 0.08);
-        }
+            .game-wrapper {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                border: 1px solid rgba(74, 158, 255, 0.25);
+                border-radius: 4px;
+                overflow: hidden;
+                background: #000;
+                box-shadow: 0 0 15px rgba(74, 158, 255, 0.08);
+            }
 
-        .game-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, 
-                transparent 0%, 
-                rgba(74, 158, 255, 0.03) 50%, 
-                transparent 100%);
-            z-index: 1;
-            pointer-events: none;
-        }
+            .game-wrapper::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(
+                    135deg,
+                    transparent 0%,
+                    rgba(74, 158, 255, 0.03) 50%,
+                    transparent 100%
+                );
+                z-index: 1;
+                pointer-events: none;
+            }
 
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-        }
+            iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+                display: block;
+            }
 
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            z-index: 1;
-            padding: 0.5rem 1rem;
-            flex-shrink: 0;
-        }
+            .controls {
+                display: flex;
+                justify-content: center;
+                gap: 1.5rem;
+                flex-wrap: wrap;
+                z-index: 1;
+                padding: 0.5rem 1rem;
+                flex-shrink: 0;
+            }
 
-        .control-group {
-            text-align: center;
-            color: #5a5a6a;
-            font-size: 0.7rem;
-        }
+            .control-group {
+                text-align: center;
+                color: #5a5a6a;
+                font-size: 0.7rem;
+            }
 
-        .control-group .key {
-            display: inline-block;
-            background: rgba(74, 158, 255, 0.08);
-            border: 1px solid rgba(74, 158, 255, 0.2);
-            border-radius: 3px;
-            padding: 0.2rem 0.5rem;
-            margin: 0.15rem;
-            font-size: 0.65rem;
-            color: #4a9eff;
-        }
+            .control-group .key {
+                display: inline-block;
+                background: rgba(74, 158, 255, 0.08);
+                border: 1px solid rgba(74, 158, 255, 0.2);
+                border-radius: 3px;
+                padding: 0.2rem 0.5rem;
+                margin: 0.15rem;
+                font-size: 0.65rem;
+                color: #4a9eff;
+            }
 
-        .control-label {
-            display: block;
-            margin-top: 0.3rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
+            .control-label {
+                display: block;
+                margin-top: 0.3rem;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+            }
 
-        footer {
-            padding: 0.5rem;
-            color: #3a3a4a;
-            font-size: 0.6rem;
-            z-index: 1;
-            flex-shrink: 0;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>ASTEROIDS</h1>
-        <div class="subtitle">Powered by Go & Ebiten</div>
-    </header>
+            footer {
+                padding: 0.5rem;
+                color: #3a3a4a;
+                font-size: 0.6rem;
+                z-index: 1;
+                flex-shrink: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>ASTEROIDS</h1>
+            <div class="subtitle">Powered by Go & Ebiten</div>
+        </header>
 
-    <div class="game-container">
-        <div class="game-wrapper">
-            <iframe src="main.html"></iframe>
+        <div class="game-container">
+            <div class="game-wrapper">
+                <iframe src="main.html"></iframe>
+            </div>
         </div>
-    </div>
 
-    <div class="controls">
-        <div class="control-group">
-            <span class="key">←</span>
-            <span class="key">→</span>
-            <span class="control-label">Rotate</span>
+        <div class="controls">
+            <div class="control-group">
+                <span class="key">←</span>
+                <span class="key">→</span>
+                <span class="control-label">Rotate</span>
+            </div>
+            <div class="control-group">
+                <span class="key">↑</span>
+                <span class="key">↓</span>
+                <span class="control-label">Thrust / Reverse</span>
+            </div>
+            <div class="control-group">
+                <span class="key">SPACE</span>
+                <span class="control-label">Fire</span>
+            </div>
+            <div class="control-group">
+                <span class="key">S</span>
+                <span class="control-label">Shield</span>
+            </div>
+            <div class="control-group">
+                <span class="key">H</span>
+                <span class="control-label">Hyperspace</span>
+            </div>
         </div>
-        <div class="control-group">
-            <span class="key">↑</span>
-            <span class="key">↓</span>
-            <span class="control-label">Thrust / Reverse</span>
-        </div>
-        <div class="control-group">
-            <span class="key">SPACE</span>
-            <span class="control-label">Fire</span>
-        </div>
-        <div class="control-group">
-            <span class="key">S</span>
-            <span class="control-label">Shield</span>
-        </div>
-        <div class="control-group">
-            <span class="key">H</span>
-            <span class="control-label">Hyperspace</span>
-        </div>
-    </div>
 
-    <footer>Built with Go + WebAssembly</footer>
-</body>
+        <footer>
+            <div
+                style="
+                    display: flex;
+                    justify-content: center;
+                    gap: 2rem;
+                "
+            >
+                <a
+                    href="https://github.com/BeratHundurel"
+                    target="_blank"
+                    style="
+                        color: #4a9eff;
+                        text-decoration: none;
+                        font-size: 0.8rem;
+                        font-weight: 600;
+                    "
+                    >GitHub</a
+                >
+                <a
+                    href="https://berathundurel.com"
+                    target="_blank"
+                    style="
+                        color: #4a9eff;
+                        text-decoration: none;
+                        font-size: 0.8rem;
+                        font-weight: 600;
+                    "
+                    >Portfolio</a
+                >
+            </div>
+        </footer>
+    </body>
 </html>
