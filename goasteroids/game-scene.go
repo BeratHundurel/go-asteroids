@@ -7,11 +7,13 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"os"
 	"sort"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/solarlune/resolv"
 )
@@ -117,6 +119,10 @@ func NewGameScene() *GameScene {
 }
 
 func (g *GameScene) Update(state *State) error {
+	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+		os.Exit(0)
+	}
+
 	g.player.Update()
 
 	g.updateExhaust()

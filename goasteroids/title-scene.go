@@ -4,6 +4,7 @@ import (
 	"go-asteroids/assets"
 	"image/color"
 	"log"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -56,6 +57,10 @@ func (t *TitleScene) Draw(screen *ebiten.Image) {
 func (t *TitleScene) Update(state *State) error {
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 		state.SceneManager.GoToScene(NewGameScene())
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+		os.Exit(0)
 	}
 
 	if len(t.meteors) < 10 {
